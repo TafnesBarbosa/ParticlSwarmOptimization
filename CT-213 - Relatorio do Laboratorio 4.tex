@@ -1,0 +1,193 @@
+\documentclass[brazil, 12pt]{article}
+
+\usepackage[portuguese]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{tasks}
+\usepackage[scale=0.8]{geometry} % Reduce document margins
+\usepackage{minted}    
+\usepackage{fancyvrb,newverbs,xcolor}
+\usepackage{titlesec}
+\usepackage{indentfirst}
+\usepackage{multirow}
+\titleformat*{\section}{\normalsize\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+% \usepackage{hyperref}
+
+\begin{document}
+
+%-----------------------------------------------------------------------------------------------
+%       CABEÇALHO
+%-----------------------------------------------------------------------------------------------
+\begin{center}
+\textbf{Instituto Tecnológico de Aeronáutica - ITA} \\
+\textbf{Inteligência Artificial para Robótica Móvel - CT213} \\
+\textbf{Aluno}: Tafnes Silva Barbosa    % ESCREVA SEU NOME AQUI
+\end{center}
+
+\begin{center}
+\textbf{Relatório do Laboratório 4 - Otimização com Métodos Baseados em População}
+\end{center}
+%-----------------------------------------------------------------------------------------------
+\vspace*{0.5cm}
+
+%-----------------------------------------------------------------------------------------------
+%       RELATÓRIO
+%-----------------------------------------------------------------------------------------------
+\section{Breve Explicação em Alto Nível da Implementação}
+
+\subsection{\emph{Particle Swarm Optimization}}
+O algoritmo PSO foi implementado levando-se em conta o pseudo-algoritmo apresentado em aula.
+
+A classe \texttt{\underline{Particle}} foi implementada de forma que, na sua inicialização, são definidos, dentro dos respectivos limites, a posição e velocidade da partícula aleatória e uniformemente. Os limites máximo e mínimo usados para a posição foram \texttt{upper\_bound} e \texttt{lower\_bound}; e para a velocidade foram \texttt{(upper\_bound-lower\_bound)} e \texttt{-(upper\_bound-lower\_bound)}. Dentro de cada partícula também foram criadas variáveis para se guardar a melhor posição da respectiva partícula ($\text{\textbf{b}}_{i}$) e o valor de qualidade dessa melhor posição ($J(\text{\textbf{b}}_{i})$).
+
+Na inicialização da classe \texttt{\underline{ParticleSwarmOptimization}} guardam-se os valores de limites das partículas, os hiperparâmetros e o número de partículas. Na inicialização também é criado um vetor de 40 partículas, as quais são inicializadas separadamente pela classe \texttt{\underline{Particle}}. Também, na inicialização, são guardados a posição e valor de qualidade da melhor partícula em uma dada geração (\texttt{best\_iteration\_position} e \texttt{best\_iteration\_value}) e a posição e valor de qualidade da melhor partícula dentre todas as gerações (\texttt{best\_global\_position} e \texttt{best\_global\_value}). Finalmente, dentro da inicialização, um contador de partículas é inicializado com 0. Este contador é usado para indicar qual partícula está sendo usada numa dada geração.
+
+A função \texttt{get\_best\_position()} retorna a posição da melhor partícula dentre todas as gerações (\texttt{best\_global\_position}). A função \texttt{get\_best\_value()} retorna o valor de qualidade da melhor partícula dentre todas as gerações (\texttt{best\_global\_value}).
+
+A função \texttt{get\_position\_to\_evaluate()} atualiza a velocidade e a posição da partícula em questão numa dada geração através das seguintes fórmulas:
+\begin{eqnarray}
+	\text{v}_{i}&=&\omega\text{v}_{i}+\varphi_{p}r_{p}(\text{b}_{i}-\text{x}_{i})+\varphi_{g}r_{g}(\text{b}_{g}-\text{x}_{i})\\
+	\text{x}_{i}&=&\text{x}_{i}+\text{v}_{i}
+\end{eqnarray}sendo que, antes de atualizar a posição ($\text{x}_{i}$), o código verifica se a velocidade ($\text{v}_{i}$) atualizada está dentro dos limites estabelecidos. E depois de atualizar a posição, verifica-se se a posição também está dentro de seus limites. Ao final, esta função retorna a posição atualizada.
+
+A função \texttt{notify\_evaluation(value)} atualiza a melhor posição e valor de qualidade de cada partícula caso o valor de qualidade calculado atualmente seja maior e também atualiza a posição e valor de qualidade da melhor partícula em uma dada geração (\texttt{best\_iteration\_position} e \texttt{best\_iteration\_value}) o valor de qualidade calculado seja maior. Nesta, função o contador de partículas é acrescido de 1 para mudar a partícula dentro de uma dada geração. Caso o contador de partículas seja igual ao número de partículas, a função \texttt{advance\_generation()} é chamada.
+
+A função \texttt{advance\_generation()} verifica se o valor de qualidade da melhor partícula da última geração é maior que o valor de qualidade da melhor partícula de todas as gerações. Caso seja, ele atualiza qual a melhor posição de partícula e melhor valor de qualidade globais. E finalmente, o contador de partículas é zerado novamente para que uma nova geração de partículas comece.
+
+
+\section{Figuras Comprovando Funcionamento do Código}
+\subsection{Teste do \emph{Particle Swarm Optimization}}
+Para o teste de implementação do PSO, foram geradas as Figuras \ref{fig:test_quality_converge} a \ref{fig:test_parameters_converge}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{test_quality_converge.png} % caminho até a figura "teste.png"
+	\caption{Convergência do valor de qualidade dado a posição de cada partícula para o teste do PSO.} % legenda da figura
+	\label{fig:test_quality_converge}  % label da figura. ex: \label{fig:test}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{test_best_convergence.png} % caminho até a figura "teste.png"
+	\caption{Convergência do valor de qualidade dado a posição da melhor partícula dentre todas as gerações para o teste do PSO.} % legenda da figura
+	\label{fig:test_best_convergence}  % label da figura. ex: \label{fig:test}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{test_parameters_converge.png} % caminho até a figura "teste.png"
+	\caption{Convergência dos parâmetros de interesse para o teste do PSO.} % legenda da figura
+	\label{fig:test_parameters_converge}  % label da figura. ex: \label{fig:test}
+\end{figure}
+
+\subsection{Otimização do controlador do robô seguidor de linha}
+Para a otimização do controlador PID do robô foi usado a seguinte fórmula de recompensa do robô:
+\begin{equation}
+	\text{reward}_{k}=v_{k}\cdot \left<r_{k},t_{k}\right>-w\cdot e_{k}\label{eq:reward}
+\end{equation}em que $\left<r_{k},t_{k}\right>$ é o produto interno entre $r_{k}$ e $t_{k}$. Quando nenhum sensor do robô detectava a linha o valor do erro atribuído foi de 30. O valor de $w$ escolhido foi de 17.5. Com isso o resultado da otimização depois de 6400 iterações é mostrado nas Figuras \ref{fig:line_quality_convergence} a \ref{fig:line_parameters_convergence}.
+
+\subsubsection{Histórico de Otimização}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{line_quality_convergence_1000_35.png} % caminho até a figura "teste.png"
+	\caption{Convergência do valor de qualidade dado a posição de cada partícula para a otimização do controlador do robô.} % legenda da figura
+	\label{fig:line_quality_convergence}  % label da figura. ex: \label{fig:test}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{line_best_convergence_1000_35.png} % caminho até a figura "teste.png"
+	\caption{Convergência do valor de qualidade dado a posição da melhor partícula dentre todas as gerações para a otimização do controlador do robô.} % legenda da figura
+	\label{fig:line_best_convergence}  % label da figura. ex: \label{fig:test}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{line_parameters_convergence_1000_35.png} % caminho até a figura "teste.png"
+	\caption{Convergência dos parâmetros de interesse para a otimização do controlador do robô.} % legenda da figura
+	\label{fig:line_parameters_convergence}  % label da figura. ex: \label{fig:test}
+\end{figure}
+
+\subsubsection{Melhor Trajetória Obtida Durante a Otimização}
+A trajetória obtida após as iterações de treinamento está na Figura \ref{fig:line_follower_solution}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{line_follower_solution_1000_35.jpeg} % caminho até a figura "teste.png"
+	\caption{Trajetória do robô para os parâmetros de controlador obtidos através da otimização usando PSO.} % legenda da figura
+	\label{fig:line_follower_solution}  % label da figura. ex: \label{fig:test}
+\end{figure}
+
+\section{Discussão sobre o observado durante o processo de otimização}
+Foram feitos alguns testes do valores colocados na equação de recompensa do robô dado na equação (\ref{eq:reward}). Vamos usar algumas variáveis: a constante $w$ da equação (\ref{eq:reward}) e o erro para quando nenhum dos sensores do robô detectava a linha ($E$). A Tabela \ref{tab:teste} mostra como os parâmetros se comportaram para alguns valores de $w$ e $E$.
+
+\begin{table}[H]
+	\centering
+	\caption{Parâmetros do controlador para os valores de $w$ e $E$ da recompensa da função qualidade.}
+	\label{tab:teste}
+	\begin{tabular}{|c|c||c|c|c|c|}
+		\hline
+		\multicolumn{1}{|c}{$w$}&\multicolumn{1}{|c||}{$E$}&\multicolumn{1}{|c}{$v_{linear}$}&\multicolumn{1}{|c}{$k_{p}$}&\multicolumn{1}{|c}{$k_{i}$}&\multicolumn{1}{|c|}{$k_{d}$}\\\hline
+		0.5 & 0.06 & 0.900 & 16.011 & 1024.270 & 9.918 \\\hline
+		0.5 & 300  & 0.623 & 151.309 & 0.000 & 12.816 \\\hline
+		50 & 0.06 & 0.323 & 200.000 & 934.751 & 14.824 \\\hline
+		50 & 300 & 0.321 & 200.000 & 648.163 & 12.271 \\\hline
+		17.5 & 30 & 0.589 & 133.994 & 868.304 & 15.484 \\\hline
+	\end{tabular}
+\end{table}
+
+A última linha da Tabela \ref{tab:teste} mostra os valores dos parâmetros obtidos usando os valores de $w$ e $E$ usados para gerar as Figuras \ref{fig:line_quality_convergence} a \ref{fig:line_follower_solution} depois de 6400 iterações.
+
+Percebe-se que quanto maior o valor de $w$, maior é o $k_{p}$ (saturou no limite máximo, quando $w=50$) e a velocidade linear é pequena fazendo com que a simulação seja bem centrada na linha, mas lenta (não termina o trajeto em 15 segundos).
+
+Quando $w$ e $E$ foram pequenos a velocidade saturou no limite máximo, mas a convergência não gerou um resultado satisfatório pois não penalizava suficientemente o robô quando ele estava totalmente fora da linha.
+
+Pelos dois parágrafos anteriores, percebe-se que o $w$ é um peso que realiza um \textit{tradeoff} entre velocidade linear e centralidade de trajetória na linha, como explicado no roteiro do laboratório.
+
+Quando $w$ foi pequeno e $E$ grande, percebeu-se que o $k_{i}$ saturou no limite inferior fazendo com que os erros de regime não fossem removidos. Ou seja, ele penaliza muito quando está totalmente fora, mas não penaliza tanto quando está na linha mas não centralizado.
+
+A solução da última linha da Tabela \ref{tab:teste} foi a escolhida por fornecer a melhor trajetória a meu ver.
+
+\end{document}
+
+
+%-----------------------------------------------------------------------------------------------
+%       SUGESTÃO PARA ADICIONAR A FIGURA
+%-----------------------------------------------------------------------------------------------
+%
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.7\textwidth]{teste.png} % caminho até a figura "teste.png"
+% \caption{escreva aqui a legenda da figura} % legenda da figura
+% \label{<label da figura>}  % label da figura. ex: \label{fig:test}
+% \end{figure}  
+
+
+%-----------------------------------------------------------------------------------------------
+%       REFERENCIAR FIGURA NO TEXTO
+%-----------------------------------------------------------------------------------------------
+% \ref{<label da figura>}       
+%
+% Por ex: na Figura \ref{fig:test}, observa-se que...
+
+
+%-----------------------------------------------------------------------------------------------
+%       COPIAR LINHAS DE CÓDIGO EM TEXTO
+%-----------------------------------------------------------------------------------------------
+%
+% \begin{minted}{python}
+%     def print_hello_world():
+%         '''
+%         This function prints "Hello World!"
+%         '''
+%         print("Hello World!")
+        
+%     print_hello_world()
+% \end{minted}
+%
+%-----------------------------------------------------------------------------------------------
